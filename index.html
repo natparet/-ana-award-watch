@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ANA Business → Tokyo · Award Watch</title>
+<style>
+  :root { --ink:#1a1d24; --mute:#6b7280; --line:#e5e7eb; --bg:#f7f7f5; --navy:#13306b; --ok:#0f7b4f; --new:#c2410c; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color:var(--ink); background:var(--bg); }
+  .wrap { max-width:760px; margin:0 auto; padding:28px 18px 60px; }
+  h1 { font-size:24px; margin:0 0 4px; color:var(--navy); }
+  .sub { color:var(--mute); margin:0 0 22px; font-size:14px; }
+  .status { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:22px; }
+  .pill { background:#fff; border:1px solid var(--line); border-radius:10px; padding:10px 14px; font-size:14px; }
+  .pill b { display:block; font-size:22px; color:var(--navy); }
+  .month { margin:22px 0 8px; font-size:13px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--mute); }
+  .row { display:flex; align-items:center; gap:14px; background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px 14px; margin-bottom:8px; }
+  .date { min-width:118px; font-weight:600; }
+  .route { color:var(--mute); font-size:14px; flex:1; }
+  .seats { font-weight:600; color:var(--ok); white-space:nowrap; }
+  .tag { font-size:11px; font-weight:700; color:#fff; background:var(--new); border-radius:4px; padding:2px 6px; margin-left:6px; vertical-align:2px; }
+  .empty { background:#fff; border:1px dashed var(--line); border-radius:10px; padding:28px; text-align:center; color:var(--mute); }
+  .how { background:#fff; border:1px solid var(--line); border-radius:12px; padding:18px 20px; margin-top:30px; }
+  .how h2 { font-size:17px; margin:0 0 10px; color:var(--navy); }
+  .how ol { margin:0; padding-left:20px; } .how li { margin-bottom:8px; }
+  .warn { background:#fff7ed; border-left:3px solid var(--new); padding:10px 12px; border-radius:6px; margin-top:12px; font-size:14px; }
+  .demo { background:#eef2ff; color:var(--navy); padding:8px 12px; border-radius:8px; font-size:13px; margin-bottom:16px; }
+  small { color:var(--mute); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>ANA Business Class · New York → Tokyo</h1>
+  <p class="sub">Partner award seats bookable with Virgin Atlantic points. Checked automatically every 4 hours.</p>
+  <div id="demo"></div>
+  <div class="status" id="status"></div>
+  <div id="list"></div>
+
+  <div class="how">
+    <h2>Found a date? How to book</h2>
+    <ol>
+      <li><b>Double-check it's still there</b> by searching that date on united.com (with "Book with miles") or ana.co.jp. If an ANA nonstop shows in business at the lowest ("saver") price, Virgin should see it too.</li>
+      <li><b>Call Virgin Atlantic Flying Club</b> (the US number is on virginatlantic.com's contact page). Give the date and the ANA nonstop from JFK, and ask them to confirm they see the seat and what the points and taxes come to.</li>
+      <li><b>Transfer Amex Membership Rewards → Virgin Atlantic</b> (1:1) only once the agent confirms. Transfers usually land within minutes, but they can't be undone.</li>
+      <li>Ticket it on the same call if possible. Seats can disappear within hours.</li>
+    </ol>
+    <div class="warn">The rate last reported for NYC→Japan in ANA business is about 60,000 Virgin points one-way, plus taxes and fees. Confirm the price with the agent before transferring.</div>
+  </div>
+  <p><small id="foot"></small></p>
+</div>
+
+<script>
+const DEMO = {
+  checked_at: new Date().toISOString(),
+  config: { origins:"JFK", dests:"HND", min_seats:1, nonstop_only:true },
+  results: [
+    { date:"2027-01-14", origin:"JFK", dest:"HND", seats:2, programs:["united","aeroplan"] },
+    { date:"2027-02-03", origin:"JFK", dest:"HND", seats:1, programs:["aeroplan"] },
+    { date:"2027-03-22", origin:"JFK", dest:"HND", seats:2, programs:["united"] }
+  ],
+  new_this_run: ["2027-03-22|JFK|HND"]
+};
+
+const fmtDate = d => new Date(d + "T12:00:00").toLocaleDateString("en-US", { weekday:"short", month:"short", day:"numeric" });
+const monthOf = d => new Date(d + "T12:00:00").toLocaleDateString("en-US", { month:"long", year:"numeric" });
+const ago = iso => { const m = Math.round((Date.now() - new Date(iso)) / 60000);
+  return m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m/60)} h ago` : `${Math.round(m/1440)} days ago`; };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+
+function render(data, isDemo) {
+  if (isDemo) document.getElementById("demo").innerHTML =
+    '<div class="demo">Showing sample data. Real results appear here after the first automatic check runs.</div>';
+  const res = data.results || [], fresh = new Set(data.new_this_run || []);
+  document.getElementById("status").innerHTML = `
+    <div class="pill"><b>${res.length}</b>dates with seats</div>
+    <div class="pill"><b>${esc(data.config.origins)} → ${esc(data.config.dests)}</b>route watched</div>
+    <div class="pill"><b>${ago(data.checked_at)}</b>last checked</div>`;
+  const list = document.getElementById("list");
+  if (!res.length) {
+    list.innerHTML = '<div class="empty">No ANA business partner seats right now. That\'s normal, since ANA releases them sparingly. You\'ll get a phone alert when one appears.</div>';
+  } else {
+    let html = "", cur = "";
+    for (const e of res) {
+      const m = monthOf(e.date);
+      if (m !== cur) { html += `<div class="month">${m}</div>`; cur = m; }
+      const isNew = fresh.has(`${e.date}|${e.origin}|${e.dest}`);
+      html += `<div class="row">
+        <div class="date">${fmtDate(e.date)}${isNew ? '<span class="tag">NEW</span>' : ""}</div>
+        <div class="route">${esc(e.origin)} → ${esc(e.dest)} · nonstop · seen via ${esc((e.programs||[]).join(", "))}</div>
+        <div class="seats">${e.seats ? e.seats + " seat" + (e.seats > 1 ? "s" : "") : "seats: ?"}</div></div>`;
+    }
+    list.innerHTML = html;
+  }
+  document.getElementById("foot").textContent =
+    `Data: seats.aero cached availability. Last check ${new Date(data.checked_at).toLocaleString()}.`;
+}
+
+fetch("data.json", { cache:"no-store" })
+  .then(r => r.ok ? r.json() : Promise.reject())
+  .then(d => render(d, false))
+  .catch(() => render(DEMO, true));
+</script>
+</body>
+</html>
