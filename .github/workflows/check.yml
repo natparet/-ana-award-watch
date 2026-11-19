@@ -35,4 +35,5 @@ jobs:
           git config user.email "award-bot@users.noreply.github.com"
           git add docs/data.json
           git diff --cached --quiet || git commit -m "Update award data"
+          git pull --rebase
           git push
