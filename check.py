@@ -14,6 +14,8 @@ Optional:
   MIN_SEATS      default "1"          (set "2" if two people travel together)
   NONSTOP_ONLY   default "true"
   DAYS_AHEAD     default "360"
+  MIN_DAYS_AHEAD default "0"          (e.g. "60" = ignore anything departing in the next 60 days)
+  MONTHS         default ""           (e.g. "2027-03,2027-04,2027-10" = only these months; blank = all)
 """
 import json, os, sys, urllib.request, urllib.parse, datetime as dt
 from pathlib import Path
@@ -115,12 +117,18 @@ def main():
         "dests": env("DESTINATIONS", "HND"),
         "min_seats": num(env("MIN_SEATS", "1")) or 1,
         "nonstop_only": env("NONSTOP_ONLY", "true").lower() != "false",
+        "min_days_ahead": num(env("MIN_DAYS_AHEAD", "0")),
+        "months": [m.strip() for m in env("MONTHS").split(",") if m.strip()],
     }
     today = dt.date.today()
+    start = today + dt.timedelta(days=cfg["min_days_ahead"])
     end = today + dt.timedelta(days=num(env("DAYS_AHEAD", "360")) or 360)
 
-    rows = fetch_all(key, cfg["origins"], cfg["dests"], today.isoformat(), end.isoformat())
+    rows = fetch_all(key, cfg["origins"], cfg["dests"], start.isoformat(), end.isoformat())
     current = extract(rows, cfg["min_seats"], cfg["nonstop_only"])
+    current = [e for e in current if e["date"] >= start.isoformat()]
+    if cfg["months"]:
+        current = [e for e in current if e["date"][:7] in cfg["months"]]
 
     old = json.loads(DATA.read_text()) if DATA.exists() else {}
     seen_before = {f"{e['date']}|{e['origin']}|{e['dest']}" for e in old.get("results", [])}
