@@ -1,0 +1,34 @@
+name: Check ANA award space
+
+on:
+  schedule:
+    - cron: "17 */4 * * *"   # every 4 hours
+  workflow_dispatch:          # adds a "Run workflow" button for manual checks
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Query seats.aero
+        env:
+          SEATS_AERO_API_KEY: ${{ secrets.SEATS_AERO_API_KEY }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          ORIGINS: ${{ vars.ORIGINS }}
+          DESTINATIONS: ${{ vars.DESTINATIONS }}
+          MIN_SEATS: ${{ vars.MIN_SEATS }}
+          NONSTOP_ONLY: ${{ vars.NONSTOP_ONLY }}
+        run: python check.py
+      - name: Save results for the dashboard
+        run: |
+          git config user.name "award-bot"
+          git config user.email "award-bot@users.noreply.github.com"
+          git add docs/data.json
+          git diff --cached --quiet || git commit -m "Update award data"
+          git push
