@@ -26,6 +26,8 @@ jobs:
           NONSTOP_ONLY: ${{ vars.NONSTOP_ONLY }}
           MIN_DAYS_AHEAD: ${{ vars.MIN_DAYS_AHEAD }}
           MONTHS: ${{ vars.MONTHS }}
+          RETURN_MONTHS: ${{ vars.RETURN_MONTHS }}
+          TRACK_RETURN: ${{ vars.TRACK_RETURN }}
         run: python check.py
       - name: Save results for the dashboard
         run: |
