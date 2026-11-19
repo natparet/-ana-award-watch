@@ -16,6 +16,8 @@ Optional:
   DAYS_AHEAD     default "360"
   MIN_DAYS_AHEAD default "0"          (e.g. "60" = ignore anything departing in the next 60 days)
   MONTHS         default ""           (e.g. "2027-03,2027-04,2027-10" = only these months; blank = all)
+  RETURN_MONTHS  default ""           months for flights home (Tokyo -> US); blank = all
+  TRACK_RETURN   default "true"       set "false" to watch outbound only
 """
 import json, os, sys, urllib.request, urllib.parse, datetime as dt
 from pathlib import Path
@@ -95,11 +97,17 @@ def extract(rows, min_seats, nonstop_only):
 def notify(topic, new):
     if not topic or not new:
         return
-    lines = [f"{e['date']}  {e['origin']}->{e['dest']}  "
-             f"{e['seats'] or '?'} seat(s)" for e in new[:15]]
-    if len(new) > 15:
-        lines.append(f"...and {len(new) - 15} more")
-    msg = "\n".join(lines) + "\n\nVerify on United/ANA, then call Virgin BEFORE transferring points."
+    lines = []
+    for label, d in (("OUTBOUND (to Tokyo)", "out"), ("RETURN (to US)", "return")):
+        part = [e for e in new if e.get("direction", "out") == d]
+        if not part:
+            continue
+        lines.append(label)
+        lines += [f"{e['date']}  {e['origin']}->{e['dest']}  {e['seats'] or '?'} seat(s)" for e in part[:10]]
+        if len(part) > 10:
+            lines.append(f"...and {len(part) - 10} more")
+        lines.append("")
+    msg = "\n".join(lines) + "\nVerify on United/ANA, then call Virgin BEFORE transferring points."
     req = urllib.request.Request(
         f"https://ntfy.sh/{urllib.parse.quote(topic)}",
         data=msg.encode(),
@@ -107,6 +115,19 @@ def notify(topic, new):
                  "Priority": "high", "Tags": "airplane"},
     )
     urllib.request.urlopen(req, timeout=30)
+
+def months_list(v):
+    return [m.strip() for m in v.split(",") if m.strip()]
+
+def search(key, cfg, origins, dests, months, direction, start, end):
+    rows = fetch_all(key, origins, dests, start.isoformat(), end.isoformat())
+    found = extract(rows, cfg["min_seats"], cfg["nonstop_only"])
+    found = [e for e in found if e["date"] >= start.isoformat()]
+    if months:
+        found = [e for e in found if e["date"][:7] in months]
+    for e in found:
+        e["direction"] = direction
+    return rows, found
 
 def main():
     key = env("SEATS_AERO_API_KEY")
@@ -118,32 +139,37 @@ def main():
         "min_seats": num(env("MIN_SEATS", "1")) or 1,
         "nonstop_only": env("NONSTOP_ONLY", "true").lower() != "false",
         "min_days_ahead": num(env("MIN_DAYS_AHEAD", "0")),
-        "months": [m.strip() for m in env("MONTHS").split(",") if m.strip()],
+        "months": months_list(env("MONTHS")),
+        "track_return": env("TRACK_RETURN", "true").lower() != "false",
+        "return_months": months_list(env("RETURN_MONTHS")),
     }
     today = dt.date.today()
     start = today + dt.timedelta(days=cfg["min_days_ahead"])
     end = today + dt.timedelta(days=num(env("DAYS_AHEAD", "360")) or 360)
 
-    rows = fetch_all(key, cfg["origins"], cfg["dests"], start.isoformat(), end.isoformat())
-    current = extract(rows, cfg["min_seats"], cfg["nonstop_only"])
-    current = [e for e in current if e["date"] >= start.isoformat()]
-    if cfg["months"]:
-        current = [e for e in current if e["date"][:7] in cfg["months"]]
+    rows, current = search(key, cfg, cfg["origins"], cfg["dests"], cfg["months"], "out", start, end)
+    raw = len(rows)
+    if cfg["track_return"]:
+        # Return flights: Tokyo -> any of the US airports being watched.
+        rows, back = search(key, cfg, cfg["dests"], cfg["origins"], cfg["return_months"], "return", start, end)
+        raw += len(rows)
+        current += back
 
+    k = lambda e: f"{e['date']}|{e['origin']}|{e['dest']}"
     old = json.loads(DATA.read_text()) if DATA.exists() else {}
-    seen_before = {f"{e['date']}|{e['origin']}|{e['dest']}" for e in old.get("results", [])}
-    new = [e for e in current if f"{e['date']}|{e['origin']}|{e['dest']}" not in seen_before]
+    seen_before = {k(e) for e in old.get("results", [])}
+    new = [e for e in current if k(e) not in seen_before]
 
     DATA.parent.mkdir(exist_ok=True)
     DATA.write_text(json.dumps({
         "checked_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="minutes"),
         "config": cfg,
-        "raw_rows": len(rows),
+        "raw_rows": raw,
         "results": current,
-        "new_this_run": [f"{e['date']}|{e['origin']}|{e['dest']}" for e in new],
+        "new_this_run": [k(e) for e in new],
     }, indent=2))
 
-    print(f"{len(rows)} rows from seats.aero -> {len(current)} ANA dates, {len(new)} new")
+    print(f"{raw} rows from seats.aero -> {len(current)} ANA dates, {len(new)} new")
     notify(env("NTFY_TOPIC"), new)
 
 if __name__ == "__main__":
