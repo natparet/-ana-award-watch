@@ -1,12 +1,230 @@
 {
-  "checked_at": "2026-11-19T22:34+00:00",
+  "checked_at": "2026-11-19T22:58+00:00",
   "config": {
-    "origins": "JFK",
+    "origins": "JFK,ORD,IAD,SFO,LAX,SEA",
     "dests": "HND,NRT",
     "min_seats": 2,
     "nonstop_only": true
   },
-  "raw_rows": 513,
-  "results": [],
-  "new_this_run": []
+  "raw_rows": 20000,
+  "results": [
+    {
+      "date": "2026-11-22",
+      "origin": "SEA",
+      "dest": "HND",
+      "seats": 2,
+      "nonstop": true,
+      "programs": [
+        "velocity",
+        "united"
+      ],
+      "updated": "2026-11-19T21:44:27.465529Z"
+    },
+    {
+      "date": "2026-11-24",
+      "origin": "ORD",
+      "dest": "NRT",
+      "seats": 5,
+      "nonstop": true,
+      "programs": [
+        "velocity",
+        "united"
+      ],
+      "updated": "2026-11-19T22:13:35.181569Z"
+    },
+    {
+      "date": "2026-11-25",
+      "origin": "ORD",
+      "dest": "HND",
+      "seats": 3,
+      "nonstop": true,
+      "programs": [
+        "velocity"
+      ],
+      "updated": "2026-11-19T22:33:49.579404Z"
+    },
+    {
+      "date": "2026-11-25",
+      "origin": "ORD",
+      "dest": "NRT",
+      "seats": 6,
+      "nonstop": true,
+      "programs": [
+        "velocity",
+        "united"
+      ],
+      "updated": "2026-11-19T22:33:51.956807Z"
+    },
+    {
+      "date": "2026-11-26",
+      "origin": "LAX",
+      "dest": "NRT",
+      "seats": 4,
+      "nonstop": true,
+      "programs": [
+        "velocity",
+        "united"
+      ],
+      "updated": "2026-11-19T21:20:57.216925Z"
+    },
+    {
+      "date": "2026-11-26",
+      "origin": "ORD",
+      "dest": "NRT",
+      "seats": 5,
+      "nonstop": true,
+      "programs": [
+        "velocity",
+        "united"
+      ],
+      "updated": "2026-11-19T22:28:16.136865Z"
+    },
+    {
+      "date": "2026-11-27",
+      "origin": "LAX",
+      "dest": "HND",
+      "seats": 9,
+      "nonstop": true,
+      "programs": [
+        "velocity",
+        "united"
+      ],
+      "updated": "2026-11-19T22:17:20.053191Z"
+    },
+    {
+      "date": "2026-11-27",
+      "origin": "ORD",
+      "dest": "HND",
+      "seats": 2,
+      "nonstop": true,
+      "programs": [
+        "velocity"
+      ],
+      "updated": "2026-11-19T22:48:50.824075Z"
+    },
+    {
+      "date": "2026-11-27",
+      "origin": "ORD",
+      "dest": "NRT",
+      "seats": 2,
+      "nonstop": true,
+      "programs": [
+        "velocity",
+        "united"
+      ],
+      "updated": "2026-11-19T22:48:54.641411Z"
+    },
+    {
+      "date": "2026-11-27",
+      "origin": "SEA",
+      "dest": "HND",
+      "seats": 4,
+      "nonstop": true,
+      "programs": [
+        "velocity",
+        "united"
+      ],
+      "updated": "2026-11-19T22:48:51.390651Z"
+    },
+    {
+      "date": "2026-11-27",
+      "origin": "SFO",
+      "dest": "NRT",
+      "seats": 2,
+      "nonstop": true,
+      "programs": [
+        "velocity"
+      ],
+      "updated": "2026-11-19T22:01:57.760302Z"
+    },
+    {
+      "date": "2026-11-28",
+      "origin": "LAX",
+      "dest": "NRT",
+      "seats": 3,
+      "nonstop": true,
+      "programs": [
+        "velocity",
+        "united"
+      ],
+      "updated": "2026-11-19T22:48:50.040246Z"
+    },
+    {
+      "date": "2026-11-28",
+      "origin": "ORD",
+      "dest": "HND",
+      "seats": 3,
+      "nonstop": true,
+      "programs": [
+        "velocity",
+        "united"
+      ],
+      "updated": "2026-11-19T22:48:50.650327Z"
+    },
+    {
+      "date": "2026-11-28",
+      "origin": "ORD",
+      "dest": "NRT",
+      "seats": 4,
+      "nonstop": true,
+      "programs": [
+        "velocity",
+        "united"
+      ],
+      "updated": "2026-11-19T22:48:49.019872Z"
+    },
+    {
+      "date": "2026-11-28",
+      "origin": "SEA",
+      "dest": "HND",
+      "seats": 4,
+      "nonstop": true,
+      "programs": [
+        "velocity",
+        "united"
+      ],
+      "updated": "2026-11-19T22:18:17.063033Z"
+    },
+    {
+      "date": "2026-11-29",
+      "origin": "ORD",
+      "dest": "NRT",
+      "seats": 2,
+      "nonstop": true,
+      "programs": [
+        "velocity"
+      ],
+      "updated": "2026-11-19T19:57:34.214021Z"
+    },
+    {
+      "date": "2026-12-27",
+      "origin": "SFO",
+      "dest": "NRT",
+      "seats": 2,
+      "nonstop": true,
+      "programs": [
+        "united"
+      ],
+      "updated": "2026-11-19T22:48:32.343009Z"
+    }
+  ],
+  "new_this_run": [
+    "2026-11-22|SEA|HND",
+    "2026-11-24|ORD|NRT",
+    "2026-11-25|ORD|HND",
+    "2026-11-25|ORD|NRT",
+    "2026-11-26|LAX|NRT",
+    "2026-11-26|ORD|NRT",
+    "2026-11-27|LAX|HND",
+    "2026-11-27|ORD|HND",
+    "2026-11-27|ORD|NRT",
+    "2026-11-27|SEA|HND",
+    "2026-11-27|SFO|NRT",
+    "2026-11-28|LAX|NRT",
+    "2026-11-28|ORD|HND",
+    "2026-11-28|ORD|NRT",
+    "2026-11-28|SEA|HND",
+    "2026-11-29|ORD|NRT",
+    "2026-12-27|SFO|NRT"
+  ]
 }
