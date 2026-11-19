@@ -27,6 +27,9 @@
   .warn { background:#fff7ed; border-left:3px solid var(--new); padding:10px 12px; border-radius:6px; margin-top:12px; font-size:14px; }
   .demo { background:#eef2ff; color:var(--navy); padding:8px 12px; border-radius:8px; font-size:13px; margin-bottom:16px; }
   small { color:var(--mute); }
+  h2.sec { font-size:18px; color:var(--navy); margin:28px 0 4px; }
+  h2.sec span { font-size:13px; font-weight:500; color:var(--mute); margin-left:6px; }
+  .note { font-size:13px; color:var(--mute); margin:-8px 0 8px; }
 </style>
 </head>
 <body>
@@ -35,6 +38,7 @@
   <p class="sub">Partner award seats bookable with Virgin Atlantic points. Checked automatically every hour.</p>
   <div id="demo"></div>
   <div class="status" id="status"></div>
+  <p class="note">Dates are departure dates. Flights to Tokyo land the next day. Book outbound and return as two separate one-way awards.</p>
   <div id="list"></div>
 
   <div class="how">
@@ -57,7 +61,8 @@ const DEMO = {
   results: [
     { date:"2027-01-14", origin:"JFK", dest:"HND", seats:2, programs:["united","aeroplan"] },
     { date:"2027-02-03", origin:"JFK", dest:"HND", seats:1, programs:["aeroplan"] },
-    { date:"2027-03-22", origin:"JFK", dest:"HND", seats:2, programs:["united"] }
+    { date:"2027-03-22", origin:"JFK", dest:"HND", seats:2, programs:["united"] },
+    { date:"2027-04-04", origin:"HND", dest:"JFK", seats:2, programs:["aeroplan"], direction:"return" }
   ],
   new_this_run: ["2027-03-22|JFK|HND"]
 };
@@ -73,15 +78,15 @@ function render(data, isDemo) {
     '<div class="demo">Showing sample data. Real results appear here after the first automatic check runs.</div>';
   const res = data.results || [], fresh = new Set(data.new_this_run || []);
   document.getElementById("status").innerHTML = `
-    <div class="pill"><b>${res.length}</b>dates with seats</div>
+    <div class="pill"><b>${res.length}</b>dates with seats (both ways)</div>
     <div class="pill"><b>${esc(data.config.origins)} → ${esc(data.config.dests)}</b>route watched</div>
     <div class="pill"><b>${ago(data.checked_at)}</b>last checked</div>`;
   const list = document.getElementById("list");
-  if (!res.length) {
-    list.innerHTML = '<div class="empty">No ANA business partner seats right now. That\'s normal, since ANA releases them sparingly. You\'ll get a phone alert when one appears.</div>';
-  } else {
-    let html = "", cur = "";
-    for (const e of res) {
+  const section = (title, items, emptyMsg) => {
+    let html = `<h2 class="sec">${title} <span>${items.length} date${items.length === 1 ? "" : "s"}</span></h2>`;
+    if (!items.length) return html + `<div class="empty">${emptyMsg}</div>`;
+    let cur = "";
+    for (const e of items) {
       const m = monthOf(e.date);
       if (m !== cur) { html += `<div class="month">${m}</div>`; cur = m; }
       const isNew = fresh.has(`${e.date}|${e.origin}|${e.dest}`);
@@ -90,8 +95,14 @@ function render(data, isDemo) {
         <div class="route">${esc(e.origin)} → ${esc(e.dest)} · nonstop · seen via ${esc((e.programs||[]).join(", "))}</div>
         <div class="seats">${e.seats ? e.seats + " seat" + (e.seats > 1 ? "s" : "") : "seats: ?"}</div></div>`;
     }
-    list.innerHTML = html;
-  }
+    return html;
+  };
+  const out = res.filter(e => (e.direction || "out") === "out");
+  const back = res.filter(e => e.direction === "return");
+  list.innerHTML =
+    section("Outbound · US → Tokyo", out, "No matching outbound seats right now. You'll get a phone alert when one appears.") +
+    (data.config.track_return === false ? "" :
+     section("Return · Tokyo → US", back, "No matching return seats right now. You'll get a phone alert when one appears."));
   document.getElementById("foot").textContent =
     `Data: seats.aero cached availability. Last check ${new Date(data.checked_at).toLocaleString()}.`;
 }
