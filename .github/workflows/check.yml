@@ -2,7 +2,7 @@ name: Check ANA award space
 
 on:
   schedule:
-        - cron: "17 * * * *"     # every hour
+    - cron: "17 * * * *"     # every hour
   workflow_dispatch:          # adds a "Run workflow" button for manual checks
 
 permissions:
@@ -24,6 +24,8 @@ jobs:
           DESTINATIONS: ${{ vars.DESTINATIONS }}
           MIN_SEATS: ${{ vars.MIN_SEATS }}
           NONSTOP_ONLY: ${{ vars.NONSTOP_ONLY }}
+          MIN_DAYS_AHEAD: ${{ vars.MIN_DAYS_AHEAD }}
+          MONTHS: ${{ vars.MONTHS }}
         run: python check.py
       - name: Save results for the dashboard
         run: |
