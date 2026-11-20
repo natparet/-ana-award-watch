@@ -109,7 +109,7 @@ def notify(topic, new):
         if len(part) > 10:
             lines.append(f"...and {len(part) - 10} more")
         lines.append("")
-    msg = "\n".join(lines) + "\nVerify on United/ANA, then call Virgin BEFORE transferring points."
+    msg = "\n".join(lines) + "\nCall Virgin or check aircanada.com BEFORE transferring points."
     req = urllib.request.Request(
         f"https://ntfy.sh/{urllib.parse.quote(topic)}",
         data=msg.encode(),
