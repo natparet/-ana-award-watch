@@ -103,7 +103,9 @@ def notify(topic, new):
         if not part:
             continue
         lines.append(label)
-        lines += [f"{e['date']}  {e['origin']}->{e['dest']}  {e['seats'] or '?'} seat(s)" for e in part[:10]]
+        for e in part[:10]:
+            lines.append(f"{e['date']}  {e['origin']}->{e['dest']}  {e['seats'] or '?'} seat(s)")
+            lines.append(f"   > {e.get('booking', '')}")
         if len(part) > 10:
             lines.append(f"...and {len(part) - 10} more")
         lines.append("")
@@ -115,6 +117,21 @@ def notify(topic, new):
                  "Priority": "high", "Tags": "airplane"},
     )
     urllib.request.urlopen(req, timeout=30)
+
+VIRGIN_MAX_DAYS = 331   # Virgin can book ANA about this far ahead (approx.)
+VIRGIN_MIN_DAYS = 14    # ...and not within this many days of departure
+
+def booking_note(e, today):
+    """Plain-English 'who can book this today' line."""
+    d = dt.date.fromisoformat(e["date"])
+    days = (d - today).days
+    aeroplan = "aeroplan" in e.get("programs", [])
+    if days < VIRGIN_MIN_DAYS:
+        return "Too close for Virgin" + (" - Aeroplan now" if aeroplan else "")
+    if days <= VIRGIN_MAX_DAYS:
+        return "Virgin: book now"
+    opens = (d - dt.timedelta(days=VIRGIN_MAX_DAYS)).strftime("%b %-d")
+    return ("Aeroplan now - " if aeroplan else "") + f"Virgin from {opens}"
 
 def months_list(v):
     return [m.strip() for m in v.split(",") if m.strip()]
@@ -154,6 +171,9 @@ def main():
         rows, back = search(key, cfg, cfg["dests"], cfg["origins"], cfg["return_months"], "return", start, end)
         raw += len(rows)
         current += back
+
+    for e in current:
+        e["booking"] = booking_note(e, today)
 
     k = lambda e: f"{e['date']}|{e['origin']}|{e['dest']}"
     old = json.loads(DATA.read_text()) if DATA.exists() else {}
