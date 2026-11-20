@@ -27,6 +27,7 @@
   .warn { background:#fff7ed; border-left:3px solid var(--new); padding:10px 12px; border-radius:6px; margin-top:12px; font-size:14px; }
   .demo { background:#eef2ff; color:var(--navy); padding:8px 12px; border-radius:8px; font-size:13px; margin-bottom:16px; }
   small { color:var(--mute); }
+  .book { color:var(--navy); font-weight:600; font-size:13px; margin-top:2px; }
   h2.sec { font-size:18px; color:var(--navy); margin:28px 0 4px; }
   h2.sec span { font-size:13px; font-weight:500; color:var(--mute); margin-left:6px; }
   .note { font-size:13px; color:var(--mute); margin:-8px 0 8px; }
@@ -45,10 +46,9 @@
     <h2>Found a date? How to book</h2>
     <ol>
       <li><b>Double-check it's still there</b> by searching that date on united.com (with "Book with miles") or ana.co.jp. If an ANA nonstop shows in business at the lowest ("saver") price, Virgin should see it too.</li>
-      <li><b>Call Virgin Atlantic Flying Club</b> (US: 1-800-365-9500). Give the date and the ANA nonstop from JFK, and ask them to confirm they see the seat and what the points and taxes come to.</li>
+      <li><b>Call Virgin Atlantic Flying Club</b> (the US number is on virginatlantic.com's contact page). Give the date and the ANA nonstop from JFK, and ask them to confirm they see the seat and what the points and taxes come to.</li>
       <li><b>Transfer Amex Membership Rewards → Virgin Atlantic</b> (1:1) only once the agent confirms. Transfers usually land within minutes, but they can't be undone.</li>
       <li>Ticket it on the same call if possible. Seats can disappear within hours.</li>
-      <li><b>Before hanging up, ask for both booking references</b>: the Virgin one and the ANA one. You need the ANA reference to choose seats and manage the trip on ana.co.jp.</li>
     </ol>
     <div class="warn">The rate last reported for NYC→Japan in ANA business is about 60,000 Virgin points one-way, plus taxes and fees. Confirm the price with the agent before transferring.</div>
   </div>
@@ -60,7 +60,7 @@ const DEMO = {
   checked_at: new Date().toISOString(),
   config: { origins:"JFK", dests:"HND", min_seats:1, nonstop_only:true },
   results: [
-    { date:"2027-01-14", origin:"JFK", dest:"HND", seats:2, programs:["united","aeroplan"] },
+    { date:"2027-01-14", origin:"JFK", dest:"HND", seats:2, programs:["united","aeroplan"], booking:"Virgin: book now" },
     { date:"2027-02-03", origin:"JFK", dest:"HND", seats:1, programs:["aeroplan"] },
     { date:"2027-03-22", origin:"JFK", dest:"HND", seats:2, programs:["united"] },
     { date:"2027-04-04", origin:"HND", dest:"JFK", seats:2, programs:["aeroplan"], direction:"return" }
@@ -93,7 +93,7 @@ function render(data, isDemo) {
       const isNew = fresh.has(`${e.date}|${e.origin}|${e.dest}`);
       html += `<div class="row">
         <div class="date">${fmtDate(e.date)}${isNew ? '<span class="tag">NEW</span>' : ""}</div>
-        <div class="route">${esc(e.origin)} → ${esc(e.dest)} · nonstop · seen via ${esc((e.programs||[]).join(", "))}</div>
+        <div class="route">${esc(e.origin)} → ${esc(e.dest)} · nonstop · seen via ${esc((e.programs||[]).join(", "))}${e.booking ? `<div class="book">${esc(e.booking)}</div>` : ""}</div>
         <div class="seats">${e.seats ? e.seats + " seat" + (e.seats > 1 ? "s" : "") : "seats: ?"}</div></div>`;
     }
     return html;
